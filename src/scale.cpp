@@ -305,6 +305,9 @@ void tareScale() {
   long range = (max-min)/loadcell.get_scale();
   if (range > TARE_THRESHOLD_COUNTS)
     return;
+  else if (((sum-loadcell.get_offset())/loadcell.get_scale()) > 3) {
+    return;
+  }
   else
     loadcell.set_offset(sum);
   lastTareAt = millis();
