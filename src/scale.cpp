@@ -42,8 +42,8 @@ bool newOffset = false;
 int currentMenuItem = 0;
 int currentSetting;
 int encoderValue = 0;
-int menuItemsCount = 8;
-MenuItem menuItems[8] = {
+int menuItemsCount = 9;
+MenuItem menuItems[9] = {
     {1, false, "Manual Grind", 0},
     {2, false, "Cup weight", 1, &setCupWeight},
     {3, false, "Calibrate", 0},
@@ -51,7 +51,8 @@ MenuItem menuItems[8] = {
     {5, false, "Scale Mode", 0},
     {6, false, "Grinding Mode", 0},
     {7, false, "Exit", 0},
-    {8, false, "Reset", 0}}; // structure is mostly useless for now, plan on making menu easier to customize later
+    {8, false, "Reset", 0},
+    {9, false, "Tare", 0}}; // structure is mostly useless for now, plan on making menu easier to customize later
 
 void grinderToggle()
 {
@@ -129,6 +130,13 @@ void rotary_onButtonClick()
       currentSetting = 7;
       greset = false;
       Serial.println("Reset Menu");
+    }
+    else if (currentMenuItem == 8)
+    {
+      scaleStatus = STATUS_TARING;
+      currentSetting = -1;
+      lastTareAt = 0;
+      Serial.println("Taring");
     }
   }
   else if(scaleStatus == STATUS_IN_SUBMENU){
