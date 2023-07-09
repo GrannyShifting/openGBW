@@ -32,7 +32,7 @@ class MenuItem
 #define LOADCELL_SCALE_FACTOR 7351
 
 #define TARE_MEASURES 20 // use the average of measure for taring
-#define TARE_THRESHOLD_COUNTS 5 // 
+#define TARE_THRESHOLD_COUNTS 1680
 #define SIGNIFICANT_WEIGHT_CHANGE 5 // 5 grams changes are used to detect a significant change
 #define COFFEE_DOSE_WEIGHT 18
 #define COFFEE_DOSE_OFFSET -2.5

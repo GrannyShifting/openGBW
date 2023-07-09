@@ -289,7 +289,7 @@ void tareScale() {
   long sum=0;
   Serial.println("Taring scale");
   for (int i=0; i<TARE_MEASURES; i++){
-    long result = loadcell.read_average(1);
+    long result = loadcell.read();
     if (i == 0){
       min = result;
       max = result;
@@ -302,19 +302,20 @@ void tareScale() {
     }
     sum += result;
   }
-  long range = (max-min)/loadcell.get_scale();
+  Serial.println(min);
+  Serial.println(max);
+  long range = max-min;
+  Serial.println(range);
+  Serial.println(sum/loadcell.get_scale());
   if (range > TARE_THRESHOLD_COUNTS)
     return;
-  else if (((sum-loadcell.get_offset())/loadcell.get_scale()) > 3) {
-    return;
-  }
   else
-    loadcell.set_offset(sum);
+    loadcell.set_offset(sum/TARE_MEASURES);
   lastTareAt = millis();
 }
 
 void updateScale( void * parameter) {
-  float lastEstimate;
+  float lastEstimate=0;
 
 
   for (;;) {
@@ -352,8 +353,7 @@ void scaleStatusLoop(void *p) {
     if (scaleStatus == STATUS_EMPTY) {
       if (((millis() - lastTareAt) > TARE_MIN_INTERVAL)
           && (ABS(tenSecAvg) >= 0.1) 
-          && (tenSecAvg < 3) 
-          && (scaleWeight < 3)) {
+          && (tenSecAvg < 3)) {
         // tare if: not tared recently, more than 0.2 away from 0, less than 3 grams total (also works for negative weight)
         lastTareAt = 0;
         scaleStatus = STATUS_TARING;
