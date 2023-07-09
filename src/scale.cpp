@@ -276,8 +276,29 @@ void readEncoderISR()
 }
 
 void tareScale() {
+  long min=0;
+  long max=0;
+  long sum=0;
   Serial.println("Taring scale");
-  loadcell.tare(TARE_MEASURES);
+  for (int i=0; i<TARE_MEASURES; i++){
+    long result = loadcell.read_average(1);
+    if (i == 0){
+      min = result;
+      max = result;
+    }
+    else {
+      if (result < min)
+        min = result;
+      if (result > max)
+        max = result;
+    }
+    sum += result;
+  }
+  long range = (max-min)/loadcell.get_scale();
+  if (range > TARE_THRESHOLD_COUNTS)
+    return;
+  else
+    loadcell.set_offset(sum);
   lastTareAt = millis();
 }
 
