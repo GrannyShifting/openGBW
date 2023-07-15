@@ -11,7 +11,7 @@ Preferences preferences;
 
 AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(ROTARY_ENCODER_A_PIN, ROTARY_ENCODER_B_PIN, ROTARY_ENCODER_BUTTON_PIN, ROTARY_ENCODER_VCC_PIN, ROTARY_ENCODER_STEPS);
 
-#define ABS(a) (((a) > 0) ? (a) : ((a) * -1))
+#define ABS(a) (((a) > 0.0) ? (a) : ((a) * -1.0))
 
 TaskHandle_t ScaleTask;
 TaskHandle_t ScaleStatusTask;
@@ -350,9 +350,9 @@ void scaleStatusLoop(void *p) {
 
     if (scaleStatus == STATUS_EMPTY) {
       if (((millis() - lastTareAt) > TARE_MIN_INTERVAL)
-          && (ABS(scaleWeight) >= 0.1) 
-          && (tenSecAvg < 3)
-          && (scaleWeight < 3)) {
+          && (ABS(scaleWeight) > 0.0) 
+          && (tenSecAvg < 3.0)
+          && (scaleWeight < 3.0)) {
         // tare if: not tared recently, more than 0.2 away from 0, less than 3 grams total (also works for negative weight)
         lastTareAt = 0;
         scaleStatus = STATUS_TARING;
