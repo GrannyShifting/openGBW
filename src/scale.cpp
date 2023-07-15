@@ -350,7 +350,7 @@ void scaleStatusLoop(void *p) {
 
     if (scaleStatus == STATUS_EMPTY) {
       if (((millis() - lastTareAt) > TARE_MIN_INTERVAL)
-          && (ABS(tenSecAvg) >= 0.1) 
+          && (ABS(scaleWeight) >= 0.1) 
           && (tenSecAvg < 3)
           && (scaleWeight < 3)) {
         // tare if: not tared recently, more than 0.2 away from 0, less than 3 grams total (also works for negative weight)
