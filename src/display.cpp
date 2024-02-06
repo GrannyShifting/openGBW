@@ -173,6 +173,18 @@ void showResetMenu()
   u8g2.sendBuffer();
 }
 
+void showTimeoutMenu(){
+  char buf[16];
+  u8g2.clearBuffer();
+  u8g2.setFontPosTop();
+  u8g2.setFont(u8g2_font_7x14B_tf);
+  CenterPrintToScreen("Set Timeout", 0);
+  u8g2.setFont(u8g2_font_7x13_tr);
+  snprintf(buf, sizeof(buf), "%1u sec", grinderTimeout/1000);
+  CenterPrintToScreen(buf, 28);
+  u8g2.sendBuffer();
+}
+
 void showSetting(){
   if(currentSetting == 3){
     showOffsetMenu();
@@ -199,7 +211,12 @@ void showSetting(){
   {
     showResetMenu();
   }
+  else if (currentSetting == 9)
+  {
+    showTimeoutMenu();
+  }
 }
+
 
 void updateDisplay( void * parameter) {
   char buf[64];

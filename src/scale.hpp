@@ -10,8 +10,6 @@ class MenuItem
         int id;
         bool selected;
         char menuName[16];
-        double increment;
-        double *value;
 };
 
 #define STATUS_EMPTY 0
@@ -65,6 +63,7 @@ extern bool scaleMode;
 extern bool grindMode;
 extern bool greset;
 extern int menuItemsCount;
+extern unsigned long grinderTimeout;
 
 extern MenuItem menuItems[];
 extern int currentMenuItem;

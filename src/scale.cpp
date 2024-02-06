@@ -24,6 +24,7 @@ double offset = 0; //stop x grams prios to set weight
 bool scaleMode = false; //use as regular scale with timer if true
 bool grindMode = true;  //false for impulse to start/stop grinding, true for continuous on while grinding
 bool grinderActive = false; //needed for continuous mode
+unsigned long grinderTimeout = 0; //grinder will stop after timeout is reached
 MathBuffer<double, 100> weightHistory;
 
 unsigned long lastAction = 0;
@@ -42,17 +43,18 @@ bool newOffset = false;
 int currentMenuItem = 0;
 int currentSetting;
 int encoderValue = 0;
-int menuItemsCount = 9;
-MenuItem menuItems[9] = {
-    {1, false, "Manual Grind", 0},
-    {2, false, "Cup weight", 1, &setCupWeight},
-    {3, false, "Calibrate", 0},
-    {4, false, "Offset", 0.1, &offset},
-    {5, false, "Scale Mode", 0},
-    {6, false, "Grinding Mode", 0},
-    {7, false, "Exit", 0},
-    {8, false, "Reset", 0},
-    {9, false, "Tare", 0}}; // structure is mostly useless for now, plan on making menu easier to customize later
+int menuItemsCount = 10;
+MenuItem menuItems[10] = {
+    {1, false, "Manual Grind"},
+    {2, false, "Cup weight"},
+    {3, false, "Calibrate"},
+    {4, false, "Offset"},
+    {5, false, "Scale Mode"},
+    {6, false, "Grinding Mode"},
+    {7, false, "Exit"},
+    {8, false, "Reset"},
+    {9, false, "Tare"},
+    {10, false, "Timeout"}};
 
 void grinderToggle()
 {
@@ -138,6 +140,12 @@ void rotary_onButtonClick()
       lastTareAt = 0;
       Serial.println("Taring");
     }
+    else if (currentMenuItem == 9)
+    {
+      scaleStatus = STATUS_IN_SUBMENU;
+      currentSetting = 9;
+      Serial.println("Grinder Timeout Menu");
+    }
   }
   else if(scaleStatus == STATUS_IN_SUBMENU){
     if(currentSetting == 3){
@@ -211,6 +219,14 @@ void rotary_onButtonClick()
       scaleStatus = STATUS_IN_MENU;
       currentSetting = -1;
     }
+    else if (currentSetting == 9)
+    {
+      preferences.begin("scale", false);
+      preferences.putULong("grinderTimeout", grinderTimeout);
+      preferences.end();
+      scaleStatus = STATUS_IN_MENU;
+      currentSetting = -1;
+    }
   }
 }
 
@@ -267,6 +283,20 @@ void rotary_loop()
       else if (currentSetting == 7)
       {
         greset = !greset;
+      }
+      else if (currentSetting == 9)
+      {
+        int newValue = rotaryEncoder.readEncoder();
+        Serial.print("Value: ");
+
+        signed long result = (signed long)grinderTimeout + (signed long)((newValue - encoderValue) * encoderDir * 1000);
+
+        grinderTimeout = (unsigned long)result;
+
+        if (result < 0)
+          grinderTimeout = 0;
+
+        encoderValue = newValue;
       }
     }
   }
@@ -392,7 +422,7 @@ void scaleStatusLoop(void *p) {
         continue;
       }
 
-      if (((millis() - startedGrindingAt) > MAX_GRINDING_TIME) && !scaleMode) {
+      if (((millis() - startedGrindingAt) > grinderTimeout) && !scaleMode) {
         Serial.println("Failed because grinding took too long");
         
         grinderToggle();
@@ -502,6 +532,7 @@ void setupScale() {
   setCupWeight = preferences.getDouble("cup", (double)CUP_WEIGHT);
   scaleMode = preferences.getBool("scaleMode", false);
   grindMode = preferences.getBool("grindMode", true);
+  grinderTimeout = preferences.getULong("grinderTimeout", (unsigned long)MAX_GRINDING_TIME);
 
   preferences.end();
   
