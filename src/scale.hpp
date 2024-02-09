@@ -34,7 +34,8 @@ class MenuItem
 #define SIGNIFICANT_WEIGHT_CHANGE 5 // 5 grams changes are used to detect a significant change
 #define COFFEE_DOSE_WEIGHT 18
 #define COFFEE_DOSE_OFFSET -2.5
-#define MAX_GRINDING_TIME 20000 // 20 seconds diff
+#define DEFAULT_GRINDER_TIMEOUT 20000 // default timeout
+#define DEFAULT_GRIND_RATE 1.0 // 1 gram per sec
 #define GRINDING_FAILED_WEIGHT_TO_RESET 150 // force on balance need to be measured to reset grinding
 
 #define GRINDER_ACTIVE_PIN 33
@@ -64,6 +65,7 @@ extern bool grindMode;
 extern bool greset;
 extern int menuItemsCount;
 extern unsigned long grinderTimeout;
+extern double grindRate;
 
 extern MenuItem menuItems[];
 extern int currentMenuItem;

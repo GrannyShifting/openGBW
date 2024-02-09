@@ -25,6 +25,7 @@ bool scaleMode = false; //use as regular scale with timer if true
 bool grindMode = true;  //false for impulse to start/stop grinding, true for continuous on while grinding
 bool grinderActive = false; //needed for continuous mode
 unsigned long grinderTimeout = 0; //grinder will stop after timeout is reached
+double grindRate = 0; // grind output in grams per second
 MathBuffer<double, 100> weightHistory;
 
 unsigned long lastAction = 0;
@@ -43,10 +44,10 @@ bool newOffset = false;
 int currentMenuItem = 0;
 int currentSetting;
 int encoderValue = 0;
-int menuItemsCount = 10;
-MenuItem menuItems[10] = {
+int menuItemsCount = 11;
+MenuItem menuItems[11] = {
     {1, false, "Manual Grind"},
-    {2, false, "Cup weight"},
+    {2, false, "Cup Weight"},
     {3, false, "Calibrate"},
     {4, false, "Offset"},
     {5, false, "Scale Mode"},
@@ -54,7 +55,8 @@ MenuItem menuItems[10] = {
     {7, false, "Exit"},
     {8, false, "Reset"},
     {9, false, "Tare"},
-    {10, false, "Timeout"}};
+    {10, false, "Timeout"},
+    {11, false, "Grind Rate"}};
 
 void grinderToggle()
 {
@@ -146,6 +148,12 @@ void rotary_onButtonClick()
       currentSetting = 9;
       Serial.println("Grinder Timeout Menu");
     }
+    else if (currentMenuItem == 10)
+    {
+      scaleStatus = STATUS_IN_SUBMENU;
+      currentSetting = 10;
+      Serial.println("Grind Rate Menu");
+    }
   }
   else if(scaleStatus == STATUS_IN_SUBMENU){
     if(currentSetting == 3){
@@ -211,7 +219,10 @@ void rotary_onButtonClick()
         preferences.putBool("scaleMode", false);
         grindMode = true;
         preferences.putBool("grindMode", true);
-
+        grinderTimeout = DEFAULT_GRINDER_TIMEOUT;
+        preferences.putULong("grinderTimeout", (unsigned long)DEFAULT_GRINDER_TIMEOUT);
+        grindRate = DEFAULT_GRIND_RATE;
+        preferences.putDouble("grindRate", (double)DEFAULT_GRIND_RATE);
         loadcell.set_scale((double)LOADCELL_SCALE_FACTOR);
         preferences.end();
       }
@@ -223,6 +234,14 @@ void rotary_onButtonClick()
     {
       preferences.begin("scale", false);
       preferences.putULong("grinderTimeout", grinderTimeout);
+      preferences.end();
+      scaleStatus = STATUS_IN_MENU;
+      currentSetting = -1;
+    }
+    else if (currentSetting == 10)
+    {
+      preferences.begin("scale", false);
+      preferences.putDouble("grindRate", grindRate);
       preferences.end();
       scaleStatus = STATUS_IN_MENU;
       currentSetting = -1;
@@ -245,18 +264,21 @@ void rotary_loop()
     if(scaleStatus == STATUS_EMPTY){
         int newValue = rotaryEncoder.readEncoder();
         Serial.print("Value: ");
-
+        
         setWeight += ((float)newValue - (float)encoderValue) / 10 * encoderDir;
+
+        if (setWeight < 0)
+          setWeight = 0;
 
         encoderValue = newValue;
         Serial.println(newValue);
         preferences.begin("scale", false);
         preferences.putDouble("setWeight", setWeight);
         preferences.end();
-      }
+    }
     else if(scaleStatus == STATUS_IN_MENU){
       int newValue = rotaryEncoder.readEncoder();
-      currentMenuItem = (currentMenuItem + (newValue - encoderValue) * encoderDir) % menuItemsCount;
+      currentMenuItem = (currentMenuItem + (newValue - encoderValue) * (-1)*encoderDir) % menuItemsCount;
       currentMenuItem = currentMenuItem < 0 ? menuItemsCount + currentMenuItem : currentMenuItem;
       encoderValue = newValue;
       Serial.println(currentMenuItem);
@@ -295,6 +317,20 @@ void rotary_loop()
 
         if (result < 0)
           grinderTimeout = 0;
+
+        encoderValue = newValue;
+      }
+      else if (currentSetting == 10)
+      {
+        int newValue = rotaryEncoder.readEncoder();
+        Serial.print("Value: ");
+
+        double result = grindRate + ((newValue - encoderValue) * encoderDir / 10.0);
+
+        grindRate = result;
+
+        if (result < 0)
+          grindRate = 0;
 
         encoderValue = newValue;
       }
@@ -430,8 +466,8 @@ void scaleStatusLoop(void *p) {
         continue;
       }
 
-      if ( ((millis() - startedGrindingAt) > 3000) // started grinding at least 3s ago
-            && ((scaleWeight - weightHistory.firstValueOlderThan(millis() - 2000)) < 0.5) // less than a gram has been grinded in the last 2 second
+      if ( ((millis() - startedGrindingAt) > 2000) // started grinding at least 2s ago
+            && ((scaleWeight - weightHistory.firstValueOlderThan(millis() - 1000)) < grindRate) // default is 1 gram per second
             && !scaleMode) {
         Serial.println("Failed because no change in weight was detected");
         
@@ -532,7 +568,8 @@ void setupScale() {
   setCupWeight = preferences.getDouble("cup", (double)CUP_WEIGHT);
   scaleMode = preferences.getBool("scaleMode", false);
   grindMode = preferences.getBool("grindMode", true);
-  grinderTimeout = preferences.getULong("grinderTimeout", (unsigned long)MAX_GRINDING_TIME);
+  grinderTimeout = preferences.getULong("grinderTimeout", (unsigned long)DEFAULT_GRINDER_TIMEOUT);
+  grindRate = preferences.getDouble("grindRate", (double)DEFAULT_GRIND_RATE);
 
   preferences.end();
   

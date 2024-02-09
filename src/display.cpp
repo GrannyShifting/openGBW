@@ -64,10 +64,10 @@ void showOffsetMenu(){
   u8g2.clearBuffer();
   u8g2.setFontPosTop();
   u8g2.setFont(u8g2_font_7x14B_tf);
-  CenterPrintToScreen("Adjust offset", 0);
+  CenterPrintToScreen("Adjust Offset", 35);
   u8g2.setFont(u8g2_font_7x13_tr);
   snprintf(buf, sizeof(buf), "%3.2fg", offset);
-  CenterPrintToScreen(buf, 28);
+  CenterPrintToScreen(buf, 51);
   u8g2.sendBuffer();
 }
 
@@ -77,9 +77,9 @@ void showManualGrindMenu(){
   u8g2.clearBuffer();
   u8g2.setFontPosTop();
   u8g2.setFont(u8g2_font_7x13_tr);
-  CenterPrintToScreen("Click to start", 20);
+  CenterPrintToScreen("Click to start", 35);
   u8g2.setFont(u8g2_font_7x13_tr);
-  CenterPrintToScreen("grinding", 38);
+  CenterPrintToScreen("grinding", 51);
   u8g2.sendBuffer();
 }
 
@@ -90,15 +90,15 @@ void showScaleModeMenu()
   u8g2.clearBuffer();
   u8g2.setFontPosTop();
   u8g2.setFont(u8g2_font_7x14B_tf);
-  CenterPrintToScreen("Set Scale Mode", 0);
+  CenterPrintToScreen("Scale Mode", 19);
   u8g2.setFont(u8g2_font_7x13_tr);
   if(scaleMode){
-    LeftPrintToScreen("GBW", 19);
-    LeftPrintActiveToScreen("Scale only", 35);
+    LeftPrintToScreen("GBW", 35);
+    LeftPrintActiveToScreen("Scale only", 51);
   }
   else{
-    LeftPrintActiveToScreen("GBW", 19);
-    LeftPrintToScreen("Scale only", 35);
+    LeftPrintActiveToScreen("GBW", 35);
+    LeftPrintToScreen("Scale only", 51);
   }
   u8g2.sendBuffer();
 }
@@ -109,8 +109,7 @@ void showGrindModeMenu()
   u8g2.clearBuffer();
   u8g2.setFontPosTop();
   u8g2.setFont(u8g2_font_7x14B_tf);
-  CenterPrintToScreen("Set Grinder ", 0);
-  CenterPrintToScreen("Start/Stop Mode", 19);
+  CenterPrintToScreen("Run Mode", 19);
   u8g2.setFont(u8g2_font_7x13_tr);
   if (grindMode)
   {
@@ -178,10 +177,22 @@ void showTimeoutMenu(){
   u8g2.clearBuffer();
   u8g2.setFontPosTop();
   u8g2.setFont(u8g2_font_7x14B_tf);
-  CenterPrintToScreen("Set Timeout", 0);
+  CenterPrintToScreen("Grinder Timeout", 35);
   u8g2.setFont(u8g2_font_7x13_tr);
   snprintf(buf, sizeof(buf), "%1u sec", grinderTimeout/1000);
-  CenterPrintToScreen(buf, 28);
+  CenterPrintToScreen(buf, 51);
+  u8g2.sendBuffer();
+}
+
+void showGrindRateMenu(){
+  char buf[16];
+  u8g2.clearBuffer();
+  u8g2.setFontPosTop();
+  u8g2.setFont(u8g2_font_7x14B_tf);
+  CenterPrintToScreen("Grind Rate", 35);
+  u8g2.setFont(u8g2_font_7x13_tr);
+  snprintf(buf, sizeof(buf), "%2.1f g/sec", grindRate);
+  CenterPrintToScreen(buf, 51);
   u8g2.sendBuffer();
 }
 
@@ -214,6 +225,10 @@ void showSetting(){
   else if (currentSetting == 9)
   {
     showTimeoutMenu();
+  }
+  else if (currentSetting == 10)
+  {
+    showGrindRateMenu();
   }
 }
 
@@ -284,9 +299,9 @@ void updateDisplay( void * parameter) {
 
         u8g2.setFont(u8g2_font_7x13_tf);
         u8g2.setFontPosCenter();
-        u8g2.setCursor(5, 50);
+        u8g2.setCursor(0, 50);
         snprintf(buf2, sizeof(buf2), "Set: %3.1fg", setWeight);
-        LeftPrintToScreen(buf2, 50);
+        CenterPrintToScreen(buf2, 50);
 
         
       } else if (scaleStatus == STATUS_GRINDING_FAILED) {
