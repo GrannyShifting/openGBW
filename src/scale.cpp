@@ -44,19 +44,18 @@ bool newOffset = false;
 int currentMenuItem = 0;
 int currentSetting;
 int encoderValue = 0;
-int menuItemsCount = 11;
-MenuItem menuItems[11] = {
-    {1, false, "Manual Grind"},
+int menuItemsCount = 10;
+MenuItem menuItems[10] = {
+    {1, false, "Exit"},
     {2, false, "Cup Weight"},
     {3, false, "Calibrate"},
     {4, false, "Offset"},
     {5, false, "Scale Mode"},
     {6, false, "Grinding Mode"},
-    {7, false, "Exit"},
-    {8, false, "Reset"},
-    {9, false, "Tare"},
-    {10, false, "Timeout"},
-    {11, false, "Grind Rate"}};
+    {7, false, "Reset"},
+    {8, false, "Tare"},
+    {9, false, "Timeout"},
+    {10, false, "Grind Rate"}};
 
 void grinderToggle()
 {
@@ -88,16 +87,10 @@ void rotary_onButtonClick()
     rotaryEncoder.setAcceleration(0);
   }
   else if(scaleStatus == STATUS_IN_MENU){
-    if(currentMenuItem == 6){
+    if(currentMenuItem == 0){
       scaleStatus = STATUS_EMPTY;
       rotaryEncoder.setAcceleration(100);
       Serial.println("Exited Menu");
-    }
-    else if (currentMenuItem == 0)
-    {
-      grinderToggle();
-      currentSetting = 0;
-      Serial.println("Manual Grind Menu");
     }
     else if (currentMenuItem == 3){
       scaleStatus = STATUS_IN_SUBMENU;
@@ -128,30 +121,30 @@ void rotary_onButtonClick()
       currentSetting = 5;
       Serial.println("Grind Mode Menu");
     }
-    else if (currentMenuItem == 7)
+    else if (currentMenuItem == 6)
     {
       scaleStatus = STATUS_IN_SUBMENU;
-      currentSetting = 7;
+      currentSetting = 6;
       greset = false;
       Serial.println("Reset Menu");
     }
-    else if (currentMenuItem == 8)
+    else if (currentMenuItem == 7)
     {
       scaleStatus = STATUS_TARING;
       currentSetting = -1;
       lastTareAt = 0;
       Serial.println("Taring");
     }
+    else if (currentMenuItem == 8)
+    {
+      scaleStatus = STATUS_IN_SUBMENU;
+      currentSetting = 8;
+      Serial.println("Grinder Timeout Menu");
+    }
     else if (currentMenuItem == 9)
     {
       scaleStatus = STATUS_IN_SUBMENU;
       currentSetting = 9;
-      Serial.println("Grinder Timeout Menu");
-    }
-    else if (currentMenuItem == 10)
-    {
-      scaleStatus = STATUS_IN_SUBMENU;
-      currentSetting = 10;
       Serial.println("Grind Rate Menu");
     }
   }
@@ -204,7 +197,7 @@ void rotary_onButtonClick()
       scaleStatus = STATUS_IN_MENU;
       currentSetting = -1;
     }
-    else if (currentSetting == 7)
+    else if (currentSetting == 6)
     {
       if(greset){
         preferences.begin("scale", false);
@@ -230,7 +223,7 @@ void rotary_onButtonClick()
       scaleStatus = STATUS_IN_MENU;
       currentSetting = -1;
     }
-    else if (currentSetting == 9)
+    else if (currentSetting == 8)
     {
       preferences.begin("scale", false);
       preferences.putULong("grinderTimeout", grinderTimeout);
@@ -238,7 +231,7 @@ void rotary_onButtonClick()
       scaleStatus = STATUS_IN_MENU;
       currentSetting = -1;
     }
-    else if (currentSetting == 10)
+    else if (currentSetting == 9)
     {
       preferences.begin("scale", false);
       preferences.putDouble("grindRate", grindRate);
@@ -302,11 +295,11 @@ void rotary_loop()
       {
         grindMode = !grindMode;
       }
-      else if (currentSetting == 7)
+      else if (currentSetting == 6)
       {
         greset = !greset;
       }
-      else if (currentSetting == 9)
+      else if (currentSetting == 8)
       {
         int newValue = rotaryEncoder.readEncoder();
         Serial.print("Value: ");
@@ -320,7 +313,7 @@ void rotary_loop()
 
         encoderValue = newValue;
       }
-      else if (currentSetting == 10)
+      else if (currentSetting == 9)
       {
         int newValue = rotaryEncoder.readEncoder();
         Serial.print("Value: ");

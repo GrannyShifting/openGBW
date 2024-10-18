@@ -200,9 +200,6 @@ void showSetting(){
   if(currentSetting == 3){
     showOffsetMenu();
   }
-  else if(currentSetting == 0){
-    showManualGrindMenu();
-  }
   else if(currentSetting == 1){
     showCupMenu();
   }
@@ -218,15 +215,15 @@ void showSetting(){
   {
     showGrindModeMenu();
   }
-  else if (currentSetting == 7)
+  else if (currentSetting == 6)
   {
     showResetMenu();
   }
-  else if (currentSetting == 9)
+  else if (currentSetting == 8)
   {
     showTimeoutMenu();
   }
-  else if (currentSetting == 10)
+  else if (currentSetting == 9)
   {
     showGrindRateMenu();
   }
