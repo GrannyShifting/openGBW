@@ -469,14 +469,6 @@ void scaleStatusLoop(void *p) {
         continue;
       }
 
-      // if (weightHistory.minSince((int64_t)millis() - 200) < (cupWeightEmpty - CUP_DETECTION_TOLERANCE) 
-      //       && !scaleMode) {
-      //   Serial.printf("Failed because weight too low, min: %f, min value: %f\n", weightHistory.minSince((int64_t)millis() - 200), CUP_WEIGHT + CUP_DETECTION_TOLERANCE);
-        
-      //   grinderToggle();
-      //   scaleStatus = STATUS_GRINDING_FAILED;
-      //   continue;
-      // }
       double currentOffset = offset;
       if(scaleMode){
         currentOffset = 0;
@@ -502,14 +494,20 @@ void scaleStatusLoop(void *p) {
                 && ((millis() - finishedGrindingAt) > 1500)
                 && newOffset)
       {
-        offset += (setWeight + cupWeightEmpty - currentWeight);
-        if(ABS(offset) >= setWeight){
-          offset = COFFEE_DOSE_OFFSET;
-        }
-        preferences.begin("scale", false);
-        preferences.putDouble("offset", offset);
-        preferences.end();
-        newOffset = false;
+        double currOffset = setWeight + cupWeightEmpty - currentWeight;
+        if(offset + currOffset < 0)
+        {
+          if (currOffset < -OFFSET_TOLERANCE)
+            currOffset = -OFFSET_TOLERANCE;
+          if (currOffset > OFFSET_TOLERANCE)
+            currOffset = OFFSET_TOLERANCE;
+
+          offset += currOffset;
+          preferences.begin("scale", false);
+          preferences.putDouble("offset", offset);
+          preferences.end();
+          newOffset = false;
+        }        
       }
     } else if (scaleStatus == STATUS_GRINDING_FAILED) {
       if (scaleWeight >= GRINDING_FAILED_WEIGHT_TO_RESET) {

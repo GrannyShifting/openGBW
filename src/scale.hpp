@@ -23,6 +23,7 @@ class MenuItem
 
 #define CUP_WEIGHT 70
 #define CUP_DETECTION_TOLERANCE 5 // 5 grams tolerance above or bellow cup weight to detect it
+#define OFFSET_TOLERANCE 3
 
 #define LOADCELL_DOUT_PIN 19
 #define LOADCELL_SCK_PIN 18
